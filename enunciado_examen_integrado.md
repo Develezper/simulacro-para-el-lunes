@@ -127,6 +127,13 @@ Separacion obligatoria:
 | API funcionando | 20% |
 | Arquitectura limpia | 15% |
 
+## Criterios de calificacion
+- MER completamente normalizado, explicado y justificado con argumentos solidos y claros.
+- CRUD robusto, bien estructurado, con manejo avanzado de relaciones y validaciones complejas, permitiendo la carga masiva de datos con CSV.
+- Base de datos completamente consistente, altamente estructurada, segura y optimizada.
+- Codigo altamente organizado, escalable, reutilizable y bien comentado.
+- README profesional, incluye guia tecnica, justificacion, recursos y documentacion.
+
 ## Entregables
 - Script SQL de creacion de tablas.
 - Proyecto Node funcional.
