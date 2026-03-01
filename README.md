@@ -58,6 +58,7 @@ npm run normalize:data
 
 ## Variables de entorno
 Revisa `.env.example`.
+Si tienes problemas de conexion TCP a MySQL, puedes usar socket local con `DB_SOCKET` (por ejemplo: `/var/run/mysqld/mysqld.sock`).
 
 ## Esquema SQL (3FN)
 El archivo [sql/schema.sql](sql/schema.sql) crea:

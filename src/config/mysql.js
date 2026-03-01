@@ -21,12 +21,13 @@ async function getMySQLPool() {
       }
 
       return mysql.createPool({
-        host: env.mysqlHost,
-        port: env.mysqlPort,
         user: env.mysqlUser,
         password: env.mysqlPassword,
         database: env.mysqlDatabase,
         connectionLimit: env.mysqlConnectionLimit,
+        ...(env.mysqlSocket
+          ? { socketPath: env.mysqlSocket }
+          : { host: env.mysqlHost, port: env.mysqlPort }),
         decimalNumbers: true,
         namedPlaceholders: false
       });
