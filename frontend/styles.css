@@ -1,12 +1,15 @@
 :root {
-  --bg: #f5f7fb;
-  --bg-soft: #eef3ff;
-  --card: #ffffff;
-  --text: #1e2430;
-  --muted: #5f6c84;
-  --line: #dbe2ef;
-  --brand: #0f4c81;
-  --brand-hover: #0b3a61;
+  --bg: #050607;
+  --bg-soft: #0f1215;
+  --card: #10161b;
+  --card-soft: #142029;
+  --text: #e7eef2;
+  --muted: #9fb0bc;
+  --line: #25333d;
+  --brand: #117781;
+  --brand-hover: #0d5f66;
+  --input-bg: #0c1318;
+  --output-bg: #090f14;
 }
 
 * {
@@ -17,7 +20,7 @@ body {
   margin: 0;
   font-family: "IBM Plex Sans", "Noto Sans", "Segoe UI", sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at top right, var(--bg-soft), var(--bg));
+  background: radial-gradient(circle at top right, #1a1f24 0%, var(--bg-soft) 40%, var(--bg) 100%);
 }
 
 .layout {
@@ -31,7 +34,7 @@ body {
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: linear-gradient(120deg, #f8fbff, #eef5ff);
+  background: linear-gradient(120deg, #16252d, #13222b);
 }
 
 .hero h1 {
@@ -49,6 +52,7 @@ body {
   border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--card);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
 }
 
 .card h2 {
@@ -73,7 +77,12 @@ input {
   width: 100%;
   padding: 0.62rem 0.7rem;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+input::placeholder {
+  color: #7f919e;
 }
 
 button {
@@ -82,6 +91,7 @@ button {
   background: var(--brand);
   color: #fff;
   cursor: pointer;
+  margin-bottom: 20px;
 }
 
 button:hover {
@@ -115,8 +125,8 @@ pre {
   min-height: 180px;
   border-radius: 10px;
   border: 1px solid var(--line);
-  background: #0f1724;
-  color: #d9e6ff;
+  background: var(--output-bg);
+  color: #d3e4ef;
   font-size: 0.84rem;
   overflow: auto;
 }

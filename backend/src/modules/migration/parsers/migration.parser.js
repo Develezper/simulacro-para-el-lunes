@@ -21,6 +21,17 @@ const REQUIRED_HEADERS = {
   paidAmount: 'Monto Pagado'
 };
 
+const REQUIRED_HEADER_VALUES = Object.values(REQUIRED_HEADERS);
+const NORMALIZED_HEADERS = new Set(REQUIRED_HEADER_VALUES.map((header) => normalizeToken(header)));
+
+function normalizeToken(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toLowerCase();
+}
+
 function parseNumber(value, fieldName) {
   const normalized = String(value ?? '').replace(/[^0-9.-]/g, '');
   const num = Number(normalized);
@@ -71,8 +82,39 @@ function parseTransactionDate(value, fieldName) {
   throw createHttpError(400, `No se pudo convertir ${fieldName} a fecha valida: ${value}`);
 }
 
-function normalizeRawRows(rawRows) {
-  return rawRows.map((row, index) => {
+function isRowCompletelyEmpty(row) {
+  return Object.values(REQUIRED_HEADERS).every((header) => {
+    const value = row?.[header];
+
+    if (value === null || value === undefined) return true;
+    return String(value).trim() === '';
+  });
+}
+
+function isTechnicalNoiseRow(row) {
+  const txCodeValue = String(row?.[REQUIRED_HEADERS.txCode] ?? '').trim();
+  const nonEmptyValues = REQUIRED_HEADER_VALUES.map((header) => String(row?.[header] ?? '').trim()).filter(Boolean);
+
+  if (!nonEmptyValues.length) return true;
+
+  const normalizedValues = nonEmptyValues.map((value) => normalizeToken(value));
+  const headerMatches = normalizedValues.filter((value) => NORMALIZED_HEADERS.has(value)).length;
+
+  // Repeated headers or metadata-like rows accidentally embedded in the file.
+  if (headerMatches >= Math.max(3, Math.floor(nonEmptyValues.length * 0.6))) {
+    return true;
+  }
+
+  // Rows without transaction code that only contain ID-like placeholders.
+  if (!txCodeValue && normalizedValues.every((value) => value.startsWith('id'))) {
+    return true;
+  }
+
+  return false;
+}
+
+function normalizeRawRows(rawRowsWithPosition) {
+  return rawRowsWithPosition.map(({ row, rowNumber }) => {
     try {
       return {
         txnCode: parseText(row[REQUIRED_HEADERS.txCode], REQUIRED_HEADERS.txCode),
@@ -97,7 +139,7 @@ function normalizeRawRows(rawRows) {
       };
     } catch (error) {
       error.details = {
-        rowNumber: index + 2
+        rowNumber
       };
 
       throw error;
@@ -164,7 +206,19 @@ async function parseMigrationFile(file) {
 
   assertHeaders(rawRows);
 
-  return normalizeRawRows(rawRows);
+  const rowsWithPosition = rawRows
+    .map((row, index) => ({
+      row,
+      rowNumber: index + 2
+    }))
+    .filter(({ row }) => !isRowCompletelyEmpty(row))
+    .filter(({ row }) => !isTechnicalNoiseRow(row));
+
+  if (!rowsWithPosition.length) {
+    throw createHttpError(400, 'El archivo no contiene filas con datos');
+  }
+
+  return normalizeRawRows(rowsWithPosition);
 }
 
 export { parseMigrationFile };

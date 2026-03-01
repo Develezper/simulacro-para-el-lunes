@@ -1,7 +1,30 @@
 const output = document.getElementById('output');
+const DEFAULT_API_BASE = 'http://127.0.0.1:3000/api';
+const DEFAULT_TIMEOUT_MS = 20000;
+
+function normalizeBaseUrl(rawValue) {
+  let value = String(rawValue || '').trim();
+
+  if (!value) return DEFAULT_API_BASE;
+
+  value = value.replace(/\/+$/, '');
+
+  if (!/^https?:\/\//i.test(value)) {
+    value = `http://${value}`;
+  }
+
+  if (!/\/api$/i.test(value)) {
+    value = `${value}/api`;
+  }
+
+  return value;
+}
 
 function getBaseUrl() {
-  return document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+  const input = document.getElementById('baseUrl');
+  const normalized = normalizeBaseUrl(input.value);
+  input.value = normalized;
+  return normalized;
 }
 
 function showResult(title, payload) {
@@ -9,11 +32,49 @@ function showResult(title, payload) {
 }
 
 async function apiRequest(path, options = {}) {
-  const response = await fetch(`${getBaseUrl()}${path}`, options);
-  const data = await response.json().catch(() => ({}));
+  let response;
+  const requestUrl = `${getBaseUrl()}${path}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    response = await fetch(requestUrl, { ...fetchOptions, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw {
+        message: `La solicitud supero el tiempo limite (${Math.round(timeoutMs / 1000)}s).`,
+        details: `Request timeout para ${requestUrl}`
+      };
+    }
+
+    throw {
+      message: 'No se pudo conectar al backend. Verifica que este ejecutandose en http://127.0.0.1:3000.',
+      details: error?.message || 'Error de red'
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const data = isJson ? await response.json().catch(() => ({})) : {};
 
   if (!response.ok) {
-    throw data;
+    let message = data?.message || `Error HTTP ${response.status}`;
+
+    if (!message && !isJson) {
+      const text = await response.text().catch(() => '');
+      if (text) message = text;
+    }
+
+    throw {
+      ...data,
+      ok: false,
+      status: response.status,
+      url: requestUrl,
+      message
+    };
   }
 
   return data;
@@ -105,19 +166,44 @@ document.getElementById('btnHistory').addEventListener('click', async () => {
 
 document.getElementById('migrationForm').addEventListener('submit', async (event) => {
   event.preventDefault();
+  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
   const fileInput = document.getElementById('migrationFile');
   if (!fileInput.files.length) return;
+  if (submitButton.disabled) return;
+
+  const file = fileInput.files[0];
+  const isAllowed = /\.(xlsx|csv|txt|tsv)$/i.test(file.name);
+
+  if (!isAllowed) {
+    showResult('POST /migration/upload ERROR', {
+      ok: false,
+      message: 'Archivo invalido. Selecciona un .xlsx, .csv, .txt o .tsv',
+      fileName: file.name
+    });
+    return;
+  }
 
   const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
+  formData.append('file', file);
 
   try {
+    submitButton.disabled = true;
+    const originalLabel = submitButton.textContent;
+    submitButton.dataset.originalLabel = originalLabel;
+    submitButton.textContent = 'Subiendo...';
+
     const result = await apiRequest('/migration/upload', {
       method: 'POST',
-      body: formData
+      body: formData,
+      timeoutMs: 180000
     });
     showResult('POST /migration/upload', result);
   } catch (error) {
     showResult('POST /migration/upload ERROR', error);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = submitButton.dataset.originalLabel || 'POST /migration/upload';
   }
 });
+
+document.getElementById('baseUrl').value = normalizeBaseUrl(document.getElementById('baseUrl').value);

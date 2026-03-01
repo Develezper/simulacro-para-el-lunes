@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon --watch src --watch normalizacion.js --ext js,mjs,cjs,json src/index.js",
     "start": "node src/index.js",
     "test": "node --test",
     "test:api": "node --test tests/integration/api.smoke.test.js",
