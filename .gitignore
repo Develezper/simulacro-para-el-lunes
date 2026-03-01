@@ -3,4 +3,5 @@ node_modules/
 npm-debug.log*
 .DS_Store
 uploads/normalizado.json
+uploads/evidencias/*.json
 uploads

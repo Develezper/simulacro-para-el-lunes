@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import {
   upsertClientRecord,
   upsertInvoiceRecord,
@@ -6,9 +8,51 @@ import {
 } from './migration.repository.js';
 import { parseMigrationFile } from './parsers/migration.parser.js';
 import { upsertClientHistoryTransaction } from '../histories/histories.repository.js';
+import { normalizeRows } from '../../../normalizacion.js';
+
+function buildEvidenceFileName(file) {
+  const baseName = path.basename(file?.originalname || file?.filename || 'upload');
+  const ext = path.extname(baseName);
+  const rawName = baseName.slice(0, baseName.length - ext.length) || 'upload';
+  const safeName = rawName.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50);
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+  return `normalizado-${stamp}-${safeName}.json`;
+}
+
+async function writeNormalizationEvidence(file, normalizedData) {
+  const evidenceDir = path.resolve(process.cwd(), 'uploads', 'evidencias');
+  await fs.mkdir(evidenceDir, { recursive: true });
+
+  const evidenceFileName = buildEvidenceFileName(file);
+  const evidenceAbsolutePath = path.join(evidenceDir, evidenceFileName);
+  const evidenceRelativePath = path.join('uploads', 'evidencias', evidenceFileName);
+
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    sourceFile: {
+      originalname: file?.originalname || null,
+      filename: file?.filename || null,
+      size: file?.size ?? null,
+      mimetype: file?.mimetype || null
+    },
+    summary: normalizedData.summary,
+    normalized: {
+      clients: normalizedData.clients,
+      platforms: normalizedData.platforms,
+      invoices: normalizedData.invoices,
+      transactions: normalizedData.transactions
+    }
+  };
+
+  await fs.writeFile(evidenceAbsolutePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+
+  return evidenceRelativePath;
+}
 
 async function migrateFromUploadedFile(file) {
   const rows = await parseMigrationFile(file);
+  const normalizedData = normalizeRows(rows);
 
   const summary = {
     processedRows: rows.length,
@@ -67,8 +111,13 @@ async function migrateFromUploadedFile(file) {
   summary.invoicesUpserted = uniqueInvoices.size;
   summary.transactionsUpserted = rows.length;
   summary.historiesUpserted = uniqueClients.size;
+  const evidencePath = await writeNormalizationEvidence(file, normalizedData);
 
-  return summary;
+  return {
+    summary,
+    evidencePath,
+    normalizationSummary: normalizedData.summary
+  };
 }
 
 export { migrateFromUploadedFile };

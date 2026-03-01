@@ -79,6 +79,7 @@ Ruta: `POST /api/migration/upload`
 - Extensiones permitidas: `.xlsx`, `.csv`, `.txt`, `.tsv`.
 - Ejecuta upserts idempotentes en MySQL (`clients`, `platforms`, `invoices`, `transactions`).
 - Sincroniza/actualiza `client_histories` en MongoDB por `clientEmail`.
+- Genera evidencia automatica en `uploads/evidencias/*.json` con resumen y datos normalizados.
 
 Ejemplo:
 ```bash
