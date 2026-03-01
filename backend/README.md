@@ -163,32 +163,20 @@ Levantar API:
 npm run dev
 ```
 
-## 10. Pruebas y verificacion
-Smoke tests:
-```bash
-npm run test
-npm run test:api
-```
-
-Verificacion de endpoints:
-```bash
-npm run verify:endpoints
-VERIFY_MIGRATION_FILE=uploads/data.xlsx npm run verify:endpoints
-```
-
-## 11. Frontend de prueba (HTML/CSS/JS)
+## 10. Frontend de prueba (Vite + HTML/CSS/JS)
 Se incluyo un frontend simple para probar el backend en:
 - `frontend/index.html`
 - `frontend/styles.css`
 - `frontend/app.js`
 
 Uso:
-1. Levanta el backend con `npm run dev`.
-2. Abre `frontend/index.html` en el navegador.
-3. Verifica que `Base URL API` apunte a `http://127.0.0.1:3000/api`.
-4. Usa botones/formularios para probar health, clientes, reportes, historial y migracion.
+1. Levanta el backend con `npm run dev` (desde `backend/`).
+2. En otra terminal: `cd ../frontend && npm install && npm run dev`.
+3. Abre `http://127.0.0.1:5173`.
+4. Verifica que `Base URL API` apunte a `http://127.0.0.1:3000/api`.
+5. Usa botones/formularios para probar health, clientes, reportes, historial y migracion.
 
-## 12. Troubleshooting rapido
+## 11. Troubleshooting rapido
 - `Access denied for user ...`:
   - validar `DB_USER`, `DB_PASSWORD`, permisos del usuario y DB objetivo.
 - `Incorrect datetime value ...` durante migracion:
@@ -198,22 +186,17 @@ Uso:
 - Timeout/conexion Mongo Atlas:
   - revisar credenciales, IP allowlist y nombre de base.
 
-## 13. Recursos tecnicos
+## 12. Recursos tecnicos
 - Express: https://expressjs.com/
 - mysql2: https://www.npmjs.com/package/mysql2
 - MongoDB Node Driver: https://www.npmjs.com/package/mongodb
 - Multer: https://www.npmjs.com/package/multer
 - SheetJS/xlsx: https://www.npmjs.com/package/xlsx
 
-## 14. Estado del entregable
+## 13. Estado del entregable
 Completado:
 - Esquema SQL en 3FN.
 - CRUD clientes.
 - Reportes SQL.
 - Migracion idempotente con evidencia.
 - Historial Mongo por email.
-- Pruebas smoke y script de verificacion.
-
-Pendiente recomendado (mejora continua):
-- tests de integracion mas profundos (casos de error de infraestructura).
-- logging estructurado y metricas de observabilidad.
