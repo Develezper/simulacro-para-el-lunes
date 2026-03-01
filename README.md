@@ -7,7 +7,7 @@ El proyecto usa ECMAScript Modules (`import/export`).
 - Node.js
 - Express
 - Axios
-- MySQL (siguiente fase)
+- MySQL
 - MongoDB (siguiente fase)
 
 ## Estructura actual
@@ -29,21 +29,22 @@ src/
   app.js
   index.js
 uploads/
+sql/
 ```
 
-## Endpoints creados en esta fase
+## Endpoints implementados
 - `GET /api/health` -> estado del servicio
-- `GET /api/clients`
-- `GET /api/clients/:id`
-- `POST /api/clients`
-- `PUT /api/clients/:id`
-- `DELETE /api/clients/:id`
+- `GET /api/clients` -> listado
+- `GET /api/clients/:id` -> detalle
+- `POST /api/clients` -> crear
+- `PUT /api/clients/:id` -> actualizar
+- `DELETE /api/clients/:id` -> eliminar
 - `GET /api/reports/total-paid-by-client`
 - `GET /api/reports/pending-invoices`
 - `GET /api/reports/transactions-by-platform`
 - `GET /api/clients/:email/history`
 
-Nota: excepto `health`, los endpoints estan como `501 Not Implemented` para completar por partes.
+Nota: los endpoints de reportes e historial aun estan en `501 Not Implemented`.
 
 ## Comandos
 ```bash
@@ -55,9 +56,19 @@ npm start
 ## Variables de entorno
 Revisa `.env.example`.
 
+## Esquema SQL (3FN)
+El archivo [sql/schema.sql](sql/schema.sql) crea:
+- `clients`
+- `platforms`
+- `invoices`
+- `transactions`
+
+Ejemplo de ejecucion:
+```bash
+mysql -u root -p < sql/schema.sql
+```
+
 ## Proximas fases
-1. Conexion MySQL y creacion de esquema en 3FN.
-2. CRUD completo de `clients` con validaciones.
-3. Migracion idempotente desde `data.xlsx`/`data.txt`.
-4. Reportes SQL.
-5. MongoDB `client_histories` y endpoint de historial.
+1. Migracion idempotente desde `data.xlsx`/`data.txt` usando Multer.
+2. Implementacion de reportes SQL.
+3. MongoDB `client_histories` y endpoint de historial.
