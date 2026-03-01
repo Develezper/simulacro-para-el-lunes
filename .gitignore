@@ -6,3 +6,5 @@ backend/node_modules/
 backend/.env
 backend/uploads/normalizado.json
 backend/uploads/evidencias/*.json
+frontend/node_modules/
+frontend/dist/
