@@ -126,6 +126,47 @@ document.getElementById('createClientForm').addEventListener('submit', async (ev
   }
 });
 
+document.getElementById('updateClientForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const entries = Object.fromEntries(formData.entries());
+  const id = entries.id;
+  delete entries.id;
+  if (!id) return;
+
+  const body = {};
+  for (const [key, value] of Object.entries(entries)) {
+    if (value.trim()) body[key] = value.trim();
+  }
+
+  if (!Object.keys(body).length) {
+    showResult(`PUT /clients/${id} ERROR`, { ok: false, message: 'Debes llenar al menos un campo para actualizar' });
+    return;
+  }
+
+  try {
+    const result = await apiRequest(`/clients/${id}`, {
+      method: 'PUT',
+      data: body
+    });
+    showResult(`PUT /clients/${id}`, result);
+  } catch (error) {
+    showResult(`PUT /clients/${id} ERROR`, error);
+  }
+});
+
+document.getElementById('btnDeleteClient').addEventListener('click', async () => {
+  const id = document.getElementById('deleteClientId').value.trim();
+  if (!id) return;
+
+  try {
+    const result = await apiRequest(`/clients/${id}`, { method: 'DELETE' });
+    showResult(`DELETE /clients/${id}`, result);
+  } catch (error) {
+    showResult(`DELETE /clients/${id} ERROR`, error);
+  }
+});
+
 document.getElementById('btnTotalPaid').addEventListener('click', async () => {
   try {
     showResult('GET /reports/total-paid-by-client', await apiRequest('/reports/total-paid-by-client'));

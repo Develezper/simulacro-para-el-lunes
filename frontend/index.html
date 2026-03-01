@@ -43,6 +43,20 @@
           <input name="address" placeholder="Address" required />
           <button type="submit">POST /clients</button>
         </form>
+
+        <form id="updateClientForm" class="form-grid">
+          <input name="id" type="number" min="1" placeholder="ID a actualizar" required />
+          <input name="full_name" placeholder="Full name" />
+          <input name="email" type="email" placeholder="Email" />
+          <input name="phone" placeholder="Phone" />
+          <input name="address" placeholder="Address" />
+          <button type="submit">PUT /clients/:id</button>
+        </form>
+
+        <div class="row compact">
+          <input id="deleteClientId" type="number" min="1" placeholder="ID a eliminar" />
+          <button id="btnDeleteClient" type="button">DELETE /clients/:id</button>
+        </div>
       </section>
 
       <section class="card">

@@ -5,7 +5,8 @@ npm-debug.log*
 backend/node_modules/
 backend/.env
 backend/uploads/normalizado.json
-backend/uploads/[0-9]*-data.xlsx
+backend/uploads/[0-9]*-*.xlsx
 backend/uploads/evidencias/*.json
+backend/uploads/.~lock.*
 frontend/node_modules/
 frontend/dist/

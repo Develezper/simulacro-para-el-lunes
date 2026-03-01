@@ -133,13 +133,13 @@ PORT=3000
 MIGRATION_CONCURRENCY=8
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_USER=jpvlz
-DB_PASSWORD=solodios
-DB_NAME=fintech_management
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=simulacro_dbb
 DB_CONNECTION_LIMIT=10
 
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/?appName=Cluster0
-MONGO_DATABASE=fintech_management
+MONGO_URI=mongodb://127.0.0.1:27017
+MONGO_DATABASE=simulacro_dbb
 MONGO_CLIENT_HISTORIES_COLLECTION=client_histories
 ```
 
