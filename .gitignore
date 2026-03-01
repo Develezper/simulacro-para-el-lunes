@@ -2,6 +2,7 @@ node_modules/
 .env
 npm-debug.log*
 .DS_Store
-uploads/normalizado.json
-uploads/evidencias/*.json
-uploads
+backend/node_modules/
+backend/.env
+backend/uploads/normalizado.json
+backend/uploads/evidencias/*.json

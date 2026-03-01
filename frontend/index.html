@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fintech Backend Tester</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="hero">
+        <h1>Fintech Backend Tester</h1>
+        <p>Panel simple para validar endpoints del backend.</p>
+      </header>
+
+      <section class="card">
+        <h2>Configuracion</h2>
+        <label for="baseUrl">Base URL API</label>
+        <input id="baseUrl" type="text" value="http://127.0.0.1:3000/api" />
+      </section>
+
+      <section class="card">
+        <h2>Health</h2>
+        <button id="btnHealth" type="button">GET /health</button>
+      </section>
+
+      <section class="card">
+        <h2>Clientes</h2>
+        <div class="row">
+          <button id="btnClients" type="button">GET /clients</button>
+        </div>
+
+        <div class="row compact">
+          <input id="clientId" type="number" min="1" placeholder="ID cliente" />
+          <button id="btnClientById" type="button">GET /clients/:id</button>
+        </div>
+
+        <form id="createClientForm" class="form-grid">
+          <input name="identification" placeholder="Identification" required />
+          <input name="full_name" placeholder="Full name" required />
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="phone" placeholder="Phone" required />
+          <input name="address" placeholder="Address" required />
+          <button type="submit">POST /clients</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Reportes</h2>
+        <div class="row">
+          <button id="btnTotalPaid" type="button">GET /reports/total-paid-by-client</button>
+          <button id="btnPending" type="button">GET /reports/pending-invoices</button>
+        </div>
+        <div class="row compact">
+          <input id="platformName" placeholder="Nequi" value="Nequi" />
+          <button id="btnByPlatform" type="button">GET /reports/transactions-by-platform</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Historial</h2>
+        <div class="row compact">
+          <input id="historyEmail" type="email" placeholder="cliente@mail.com" />
+          <button id="btnHistory" type="button">GET /clients/:email/history</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Migracion</h2>
+        <form id="migrationForm" class="row compact">
+          <input id="migrationFile" type="file" required />
+          <button type="submit">POST /migration/upload</button>
+        </form>
+      </section>
+
+      <section class="card output-card">
+        <h2>Respuesta</h2>
+        <pre id="output">Listo para probar...</pre>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,132 @@
+:root {
+  --bg: #f5f7fb;
+  --bg-soft: #eef3ff;
+  --card: #ffffff;
+  --text: #1e2430;
+  --muted: #5f6c84;
+  --line: #dbe2ef;
+  --brand: #0f4c81;
+  --brand-hover: #0b3a61;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Noto Sans", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top right, var(--bg-soft), var(--bg));
+}
+
+.layout {
+  width: min(980px, 92vw);
+  margin: 2rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.hero {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(120deg, #f8fbff, #eef5ff);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.hero p {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.card {
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+.card h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.02rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+input,
+button {
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.62rem 0.7rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+button {
+  padding: 0.62rem 0.82rem;
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--brand-hover);
+}
+
+.row {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.row.compact input {
+  min-width: 180px;
+  flex: 1;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.output-card {
+  padding-bottom: 1.1rem;
+}
+
+pre {
+  margin: 0;
+  padding: 0.9rem;
+  min-height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0f1724;
+  color: #d9e6ff;
+  font-size: 0.84rem;
+  overflow: auto;
+}
+
+@media (max-width: 720px) {
+  .layout {
+    margin: 1rem auto 1.4rem;
+  }
+
+  .hero h1 {
+    font-size: 1.35rem;
+  }
+}
