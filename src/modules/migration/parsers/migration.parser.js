@@ -42,12 +42,41 @@ function parseText(value, fieldName) {
   return text;
 }
 
+function formatDateTimeUtc(date) {
+  const pad = (num) => String(num).padStart(2, '0');
+
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+}
+
+function parseTransactionDate(value, fieldName) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    // Excel serial date (days since 1899-12-30, including fractional day for time)
+    const excelEpochMs = Date.UTC(1899, 11, 30);
+    const dateMs = Math.round(excelEpochMs + (value * 24 * 60 * 60 * 1000));
+    const date = new Date(dateMs);
+    return formatDateTimeUtc(date);
+  }
+
+  const text = parseText(value, fieldName);
+
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(text)) {
+    return text;
+  }
+
+  const parsed = new Date(text);
+  if (!Number.isNaN(parsed.getTime())) {
+    return formatDateTimeUtc(parsed);
+  }
+
+  throw createHttpError(400, `No se pudo convertir ${fieldName} a fecha valida: ${value}`);
+}
+
 function normalizeRawRows(rawRows) {
   return rawRows.map((row, index) => {
     try {
       return {
         txnCode: parseText(row[REQUIRED_HEADERS.txCode], REQUIRED_HEADERS.txCode),
-        txnDate: parseText(row[REQUIRED_HEADERS.txDate], REQUIRED_HEADERS.txDate),
+        txnDate: parseTransactionDate(row[REQUIRED_HEADERS.txDate], REQUIRED_HEADERS.txDate),
         amount: parseNumber(row[REQUIRED_HEADERS.txAmount], REQUIRED_HEADERS.txAmount),
         status: parseText(row[REQUIRED_HEADERS.txStatus], REQUIRED_HEADERS.txStatus),
         transactionType: parseText(row[REQUIRED_HEADERS.txType], REQUIRED_HEADERS.txType),
