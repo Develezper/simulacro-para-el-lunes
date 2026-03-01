@@ -1,4 +1,4 @@
-import axios from './vendor/axios.js';
+import axios from 'axios';
 
 const output = document.getElementById('output');
 const DEFAULT_API_BASE = 'http://127.0.0.1:3000/api';
