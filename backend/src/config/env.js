@@ -17,6 +17,7 @@ const env = {
   port: Number(process.env.PORT || 3000),
   apiPrefix: process.env.API_PREFIX || '/api',
   requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS || 7000),
+  migrationConcurrency: Number(process.env.MIGRATION_CONCURRENCY || 8),
   mysqlHost: process.env.MYSQL_HOST || process.env.DB_HOST || '127.0.0.1',
   mysqlPort: Number(process.env.MYSQL_PORT || process.env.DB_PORT || 3306),
   mysqlUser: process.env.MYSQL_USER || process.env.DB_USER || 'root',
@@ -39,6 +40,10 @@ if (Number.isNaN(env.port) || env.port <= 0) {
 
 if (Number.isNaN(env.requestTimeoutMs) || env.requestTimeoutMs <= 0) {
   throw new Error('REQUEST_TIMEOUT_MS debe ser un numero valido mayor que 0');
+}
+
+if (Number.isNaN(env.migrationConcurrency) || env.migrationConcurrency <= 0) {
+  throw new Error('MIGRATION_CONCURRENCY debe ser un numero valido mayor que 0');
 }
 
 if (Number.isNaN(env.mysqlPort) || env.mysqlPort <= 0) {

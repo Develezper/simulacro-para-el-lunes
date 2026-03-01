@@ -130,6 +130,7 @@ Compatibilidad:
 Ejemplo base:
 ```env
 PORT=3000
+MIGRATION_CONCURRENCY=8
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=jpvlz
@@ -141,6 +142,10 @@ MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/?appName=Cluster0
 MONGO_DATABASE=fintech_management
 MONGO_CLIENT_HISTORIES_COLLECTION=client_histories
 ```
+
+Nota de rendimiento:
+- `MIGRATION_CONCURRENCY` controla cuantas filas se procesan en paralelo durante la migracion.
+- Recomendado: `6` a `12` en local, segun capacidad de MySQL/Mongo.
 
 ## 9. Ejecucion
 Instalacion:

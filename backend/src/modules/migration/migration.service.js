@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { env } from '../../config/env.js';
 import {
   upsertClientRecord,
   upsertInvoiceRecord,
@@ -7,7 +8,7 @@ import {
   upsertTransactionRecord
 } from './migration.repository.js';
 import { parseMigrationFile } from './parsers/migration.parser.js';
-import { upsertClientHistoryTransaction } from '../histories/histories.repository.js';
+import { bulkUpsertClientHistories } from '../histories/histories.repository.js';
 import { normalizeRows } from '../../../normalizacion.js';
 
 function buildEvidenceFileName(file) {
@@ -50,6 +51,68 @@ async function writeNormalizationEvidence(file, normalizedData) {
   return evidenceRelativePath;
 }
 
+async function runWithConcurrency(items, limit, handler) {
+  if (!items.length) return;
+
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 1, items.length));
+  let cursor = 0;
+  let firstError = null;
+
+  const workers = Array.from({ length: safeLimit }, async () => {
+    while (true) {
+      if (firstError) return;
+
+      const current = cursor;
+      cursor += 1;
+
+      if (current >= items.length) return;
+
+      try {
+        await handler(items[current], current);
+      } catch (error) {
+        firstError = error;
+        return;
+      }
+    }
+  });
+
+  await Promise.all(workers);
+
+  if (firstError) {
+    throw firstError;
+  }
+}
+
+function buildHistoryPayloads(rows) {
+  const byClient = new Map();
+
+  for (const row of rows) {
+    const key = row.client.email;
+    const tx = {
+      txnCode: row.txnCode,
+      date: row.txnDate,
+      platform: row.platformName,
+      invoiceNumber: row.invoice.invoiceNumber,
+      amount: row.amount,
+      status: row.status,
+      transactionType: row.transactionType
+    };
+
+    if (!byClient.has(key)) {
+      byClient.set(key, {
+        clientEmail: key,
+        clientName: row.client.fullName,
+        transactions: [tx]
+      });
+      continue;
+    }
+
+    byClient.get(key).transactions.push(tx);
+  }
+
+  return [...byClient.values()];
+}
+
 async function migrateFromUploadedFile(file) {
   const rows = await parseMigrationFile(file);
   const normalizedData = normalizeRows(rows);
@@ -68,17 +131,20 @@ async function migrateFromUploadedFile(file) {
   const uniqueInvoices = new Set();
 
   for (const row of rows) {
-    const clientId = await upsertClientRecord(row.client);
     uniqueClients.add(row.client.identification);
+    uniquePlatforms.add(row.platformName.toLowerCase());
+    uniqueInvoices.add(row.invoice.invoiceNumber);
+  }
+
+  await runWithConcurrency(rows, env.migrationConcurrency, async (row) => {
+    const clientId = await upsertClientRecord(row.client);
 
     const platformId = await upsertPlatformRecord(row.platformName);
-    uniquePlatforms.add(row.platformName.toLowerCase());
 
     const invoiceId = await upsertInvoiceRecord({
       ...row.invoice,
       clientId
     });
-    uniqueInvoices.add(row.invoice.invoiceNumber);
 
     await upsertTransactionRecord({
       txnCode: row.txnCode,
@@ -90,21 +156,9 @@ async function migrateFromUploadedFile(file) {
       platformId,
       invoiceId
     });
+  });
 
-    await upsertClientHistoryTransaction({
-      clientEmail: row.client.email,
-      clientName: row.client.fullName,
-      transaction: {
-        txnCode: row.txnCode,
-        date: row.txnDate,
-        platform: row.platformName,
-        invoiceNumber: row.invoice.invoiceNumber,
-        amount: row.amount,
-        status: row.status,
-        transactionType: row.transactionType
-      }
-    });
-  }
+  await bulkUpsertClientHistories(buildHistoryPayloads(rows));
 
   summary.clientsUpserted = uniqueClients.size;
   summary.platformsUpserted = uniquePlatforms.size;
