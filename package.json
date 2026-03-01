@@ -6,7 +6,11 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "node --test",
+    "test:api": "node --test tests/integration/api.smoke.test.js",
+    "verify:endpoints": "node scripts/verify-endpoints.mjs",
+    "normalize:data": "node normalizacion.js uploads/data.xlsx --out uploads/normalizado.json"
   },
   "keywords": [],
   "author": "",
@@ -16,13 +20,14 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "morgan": "^1.10.1",
     "mongodb": "^6.20.0",
+    "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.18.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   }
 }

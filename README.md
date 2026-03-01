@@ -50,6 +50,10 @@ sql/
 npm install
 npm run dev
 npm start
+npm run test
+npm run test:api
+npm run verify:endpoints
+npm run normalize:data
 ```
 
 ## Variables de entorno
@@ -80,6 +84,27 @@ Ejemplo:
 ```bash
 curl -X POST http://localhost:3000/api/migration/upload \
   -F "file=@uploads/data.txt"
+```
+
+## Normalizacion local de archivo
+`normalizacion.js` ahora es un script real para normalizar `data.xlsx/.txt/.csv` y generar colecciones deduplicadas (`clients`, `platforms`, `invoices`, `transactions`).
+
+Comando recomendado:
+```bash
+npm run normalize:data
+```
+
+Uso manual:
+```bash
+node normalizacion.js uploads/data.xlsx --out uploads/normalizado.json
+```
+
+## Verificacion automatizada
+- `npm run test:api`: smoke tests de logica/validacion y parser (sin depender de puertos, MySQL o Mongo activos).
+- `npm run verify:endpoints`: verificacion completa de endpoints contra backend levantado en `http://127.0.0.1:3000/api`.
+- Para incluir migracion en la verificacion:
+```bash
+VERIFY_MIGRATION_FILE=uploads/data.txt npm run verify:endpoints
 ```
 
 ## Proximas fases
