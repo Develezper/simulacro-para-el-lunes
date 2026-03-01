@@ -1,3 +1,5 @@
+import axios from './vendor/axios.js';
+
 const output = document.getElementById('output');
 const DEFAULT_API_BASE = 'http://127.0.0.1:3000/api';
 const DEFAULT_TIMEOUT_MS = 20000;
@@ -32,52 +34,53 @@ function showResult(title, payload) {
 }
 
 async function apiRequest(path, options = {}) {
-  let response;
   const requestUrl = `${getBaseUrl()}${path}`;
-  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestOptions } = options;
+  const method = (requestOptions.method || 'GET').toUpperCase();
+  const data = requestOptions.data ?? requestOptions.body;
 
   try {
-    response = await fetch(requestUrl, { ...fetchOptions, signal: controller.signal });
+    const response = await axios({
+      url: requestUrl,
+      method,
+      headers: requestOptions.headers,
+      data,
+      timeout: timeoutMs,
+      validateStatus: () => true
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      const payload = response.data && typeof response.data === 'object' ? response.data : {};
+      const message =
+        payload?.message || (typeof response.data === 'string' ? response.data : `Error HTTP ${response.status}`);
+
+      throw {
+        ...payload,
+        ok: false,
+        status: response.status,
+        url: requestUrl,
+        message
+      };
+    }
+
+    return response.data;
   } catch (error) {
-    if (error?.name === 'AbortError') {
+    if (error?.code === 'ECONNABORTED') {
       throw {
         message: `La solicitud supero el tiempo limite (${Math.round(timeoutMs / 1000)}s).`,
         details: `Request timeout para ${requestUrl}`
       };
     }
 
+    if (error?.response || error?.status) {
+      throw error;
+    }
+
     throw {
       message: 'No se pudo conectar al backend. Verifica que este ejecutandose en http://127.0.0.1:3000.',
       details: error?.message || 'Error de red'
     };
-  } finally {
-    clearTimeout(timeout);
   }
-
-  const contentType = response.headers.get('content-type') || '';
-  const isJson = contentType.includes('application/json');
-  const data = isJson ? await response.json().catch(() => ({})) : {};
-
-  if (!response.ok) {
-    let message = data?.message || `Error HTTP ${response.status}`;
-
-    if (!message && !isJson) {
-      const text = await response.text().catch(() => '');
-      if (text) message = text;
-    }
-
-    throw {
-      ...data,
-      ok: false,
-      status: response.status,
-      url: requestUrl,
-      message
-    };
-  }
-
-  return data;
 }
 
 document.getElementById('btnHealth').addEventListener('click', async () => {
@@ -115,8 +118,7 @@ document.getElementById('createClientForm').addEventListener('submit', async (ev
   try {
     const result = await apiRequest('/clients', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      data: body
     });
     showResult('POST /clients', result);
   } catch (error) {
