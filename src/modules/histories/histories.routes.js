@@ -1,21 +1,11 @@
 import express from 'express';
-import { httpClient } from '../../config/httpClient.js';
+import { asyncHandler } from '../../utils/asyncHandler.js';
+import { getClientHistory } from './histories.controller.js';
 
 const { Router } = express;
 
 const router = Router();
 
-router.get('/clients/:email/history', async (req, res, next) => {
-  try {
-    void httpClient;
-
-    res.status(501).json({
-      ok: false,
-      message: 'Pendiente de implementacion: GET /api/clients/:email/history'
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/clients/:email/history', asyncHandler(getClientHistory));
 
 export { router as historiesRoutes };

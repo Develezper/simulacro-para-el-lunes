@@ -3,6 +3,7 @@ import { healthRoutes } from '../modules/health/health.routes.js';
 import { clientsRoutes } from '../modules/clients/clients.routes.js';
 import { reportsRoutes } from '../modules/reports/reports.routes.js';
 import { historiesRoutes } from '../modules/histories/histories.routes.js';
+import { migrationRoutes } from '../modules/migration/migration.routes.js';
 
 const { Router } = express;
 
@@ -12,5 +13,6 @@ apiRoutes.use(healthRoutes);
 apiRoutes.use(clientsRoutes);
 apiRoutes.use(reportsRoutes);
 apiRoutes.use(historiesRoutes);
+apiRoutes.use(migrationRoutes);
 
 export { apiRoutes };

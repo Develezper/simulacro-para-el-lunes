@@ -1,18 +1,17 @@
 import express from 'express';
+import { asyncHandler } from '../../utils/asyncHandler.js';
+import {
+  pendingInvoices,
+  totalPaidByClient,
+  transactionsByPlatform
+} from './reports.controller.js';
 
 const { Router } = express;
 
 const router = Router();
 
-const pending = (feature) => (_req, res) => {
-  res.status(501).json({
-    ok: false,
-    message: `Pendiente de implementacion: ${feature}`
-  });
-};
-
-router.get('/reports/total-paid-by-client', pending('GET /api/reports/total-paid-by-client'));
-router.get('/reports/pending-invoices', pending('GET /api/reports/pending-invoices'));
-router.get('/reports/transactions-by-platform', pending('GET /api/reports/transactions-by-platform?platform=Nequi'));
+router.get('/reports/total-paid-by-client', asyncHandler(totalPaidByClient));
+router.get('/reports/pending-invoices', asyncHandler(pendingInvoices));
+router.get('/reports/transactions-by-platform', asyncHandler(transactionsByPlatform));
 
 export { router as reportsRoutes };

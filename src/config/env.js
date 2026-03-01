@@ -12,7 +12,10 @@ const env = {
   mysqlUser: process.env.MYSQL_USER || 'root',
   mysqlPassword: process.env.MYSQL_PASSWORD || '',
   mysqlDatabase: process.env.MYSQL_DATABASE || 'simulacro_dbb',
-  mysqlConnectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT || 10)
+  mysqlConnectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT || 10),
+  mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017',
+  mongoDatabase: process.env.MONGO_DATABASE || 'simulacro_dbb',
+  mongoClientHistoriesCollection: process.env.MONGO_CLIENT_HISTORIES_COLLECTION || 'client_histories'
 };
 
 if (Number.isNaN(env.port) || env.port <= 0) {

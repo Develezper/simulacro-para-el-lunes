@@ -8,7 +8,7 @@ El proyecto usa ECMAScript Modules (`import/export`).
 - Express
 - Axios
 - MySQL
-- MongoDB (siguiente fase)
+- MongoDB
 
 ## Estructura actual
 ```text
@@ -39,12 +39,11 @@ sql/
 - `POST /api/clients` -> crear
 - `PUT /api/clients/:id` -> actualizar
 - `DELETE /api/clients/:id` -> eliminar
-- `GET /api/reports/total-paid-by-client`
-- `GET /api/reports/pending-invoices`
-- `GET /api/reports/transactions-by-platform`
-- `GET /api/clients/:email/history`
-
-Nota: los endpoints de reportes e historial aun estan en `501 Not Implemented`.
+- `GET /api/reports/total-paid-by-client` -> total pagado por cliente
+- `GET /api/reports/pending-invoices` -> facturas pendientes
+- `GET /api/reports/transactions-by-platform?platform=Nequi` -> transacciones por plataforma
+- `GET /api/clients/:email/history` -> historial del cliente (MongoDB)
+- `POST /api/migration/upload` -> carga masiva idempotente con archivo en campo `file`
 
 ## Comandos
 ```bash
@@ -68,7 +67,22 @@ Ejemplo de ejecucion:
 mysql -u root -p < sql/schema.sql
 ```
 
+## Migracion de datos
+Ruta: `POST /api/migration/upload`
+
+- Usa `multipart/form-data`.
+- Campo del archivo: `file`.
+- Extensiones permitidas: `.xlsx`, `.csv`, `.txt`, `.tsv`.
+- Ejecuta upserts idempotentes en MySQL (`clients`, `platforms`, `invoices`, `transactions`).
+- Sincroniza/actualiza `client_histories` en MongoDB por `clientEmail`.
+
+Ejemplo:
+```bash
+curl -X POST http://localhost:3000/api/migration/upload \
+  -F "file=@uploads/data.txt"
+```
+
 ## Proximas fases
-1. Migracion idempotente desde `data.xlsx`/`data.txt` usando Multer.
-2. Implementacion de reportes SQL.
-3. MongoDB `client_histories` y endpoint de historial.
+1. Agregar tests de integracion para CRUD, reportes y migracion.
+2. Endurecer validaciones de negocio (estados, periodos, montos).
+3. Documentar decisiones de modelado y tradeoffs SQL vs Mongo con mayor detalle.
