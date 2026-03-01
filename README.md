@@ -1,34 +1,21 @@
-# Simulacro DBB - Entrega Final
+# Simulacro DBB
 
-Estructura del proyecto:
-- `backend/`: API REST (Node.js + Express), MySQL + MongoDB, migracion, pruebas y documentacion tecnica.
-- `frontend/`: cliente Vite (HTML/CSS/JS) para probar los endpoints del backend.
+Proyecto de examen con arquitectura hibrida:
+- `backend/`: API Node.js + Express, MySQL y MongoDB.
+- `frontend/`: cliente Vite para probar endpoints.
 
-## Documentacion principal
-La documentacion completa del examen, decisiones tecnicas, arquitectura, normalizacion, endpoints y troubleshooting esta en:
-
+Documentacion tecnica completa:
 - [backend/README.md](backend/README.md)
 
-## Ejecucion rapida
-Backend:
+Ejecucion:
 ```bash
-cd backend
-npm install
-npm run dev
-```
-
-Frontend:
-```bash
-cd frontend
-npm install
-npm run dev
+cd backend && npm install && npm run dev
+cd frontend && npm install && npm run dev
 ```
 
 URLs:
 - Frontend: `http://127.0.0.1:5173`
-- API Base URL: `http://127.0.0.1:3000/api`
+- API: `http://127.0.0.1:3000/api`
 
-## Archivo base de migracion
-Para pruebas y normalizacion se usa como archivo principal:
-
+Archivo principal de migracion:
 - `backend/uploads/data.xlsx`
