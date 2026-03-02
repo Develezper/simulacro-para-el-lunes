@@ -1,0 +1,9 @@
+ID de la Transacción,Fecha y Hora de la Transacción,Monto de la Transacción,Estado de la Transacción,Tipo de Transacción,Nombre del Cliente,Número de Identificación,Dirección,Teléfono,Correo Electrónico,Plataforma Utilizada,Número de Factura,Periodo de Facturación,Monto Facturado,Monto Pagado
+TXNTEST001,2025-01-15 10:20:00,85000,Pendiente,Pago de Factura,Ana Torres,100200300,Calle 10 #20-30 Bogotá,3001112233,ana.torres@test.com,Nequi,FACTEST001,2025-01,90000,0
+TXNTEST002,2025-01-16 14:05:00,90000,Completada,Pago de Factura,Luis Pérez,100200301,Carrera 45 #12-80 Medellín,3001112244,luis.perez@test.com,Daviplata,FACTEST002,2025-01,90000,90000
+TXNTEST003,2025-01-17 08:45:00,45000,Failed,Pago parcial,Sofía Ramírez,100200302,Calle 5 #8-19 Cali,3001112255,sofia.ramirez@test.com,Nequi,FACTEST003,2025-01,120000,45000
+TXNTEST004,2025-02-01 09:30:00,120000,Completed,Pago de Factura,Carlos Díaz,100200303,Avenida 68 #40-12 Bogotá,3001112266,carlos.diaz@test.com,Daviplata,FACTEST004,2025-02,120000,120000
+TXNTEST005,2025-02-03 16:10:00,30000,Pending,Abono factura,María Gómez,100200304,Calle 72 #15-40 Barranquilla,3001112277,maria.gomez@test.com,Nequi,FACTEST005,2025-02,100000,30000
+TXNTEST006,2025-02-08 11:55:00,65000,Completada,Pago de Factura,Andrés Molina,100200305,Cra 30 #25-60 Bucaramanga,3001112288,andres.molina@test.com,Daviplata,FACTEST006,2025-02,65000,65000
+TXNTEST007,2025-02-10 13:15:00,78000,Fallida,Pago de Factura,Paula Rojas,100200306,Calle 33 #14-22 Pereira,3001112299,paula.rojas@test.com,Nequi,FACTEST007,2025-02,80000,78000
+TXNTEST008,2025-02-12 07:40:00,50000,Completed,Pago de Factura,Jorge Castillo,100200307,Calle 90 #11-45 Bogotá,3001112200,jorge.castillo@test.com,Daviplata,FACTEST008,2025-02,50000,50000

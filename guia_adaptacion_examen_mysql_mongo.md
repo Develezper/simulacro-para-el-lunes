@@ -28,6 +28,67 @@ Con eso ya sabes que va a MySQL y que va a Mongo.
 
 ## 3. Conexion a MySQL y Mongo (paso a paso)
 
+### 3.0 Crear bases de datos correctamente (obligatorio)
+
+Este punto evita el error mas comun del proyecto: conectar a una DB en `.env` pero crear tablas en otra DB distinta.
+
+Regla:
+
+1. Define un solo nombre de base, por ejemplo `fintech_management`.
+2. Usa ese mismo nombre en:
+   - `DB_NAME` / `MYSQL_DATABASE` (backend)
+   - `MONGO_DATABASE` (backend)
+   - comandos de creacion en MySQL y Mongo
+
+Si no coinciden, el backend puede leer/escribir en bases diferentes.
+
+Importante:
+
+- `backend/sql/schema.sql` trae por defecto `CREATE DATABASE ... simulacro_dbb` y `USE simulacro_dbb`.
+- Si usaras otro nombre (ej: `fintech_management`), primero ajusta esas lineas del SQL o unifica todo a `simulacro_dbb`.
+
+#### 3.0.1 Crear DB en MySQL
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u <usuario> -p -e "CREATE DATABASE IF NOT EXISTS fintech_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Aplicar esquema (misma DB):
+
+```bash
+cd backend
+mysql -h 127.0.0.1 -P 3306 -u <usuario> -p fintech_management < sql/schema.sql
+```
+
+Validar enums de estado:
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u <usuario> -p fintech_management -e "SHOW COLUMNS FROM invoices LIKE 'status'; SHOW COLUMNS FROM transactions LIKE 'status';"
+```
+
+Debe quedar:
+
+- `invoices.status` = `enum('Pending','Partial','Paid')`
+- `transactions.status` = `enum('Pending','Completed','Failed')`
+
+#### 3.0.2 Crear DB y coleccion en Mongo
+
+```bash
+mongosh --quiet --eval "use fintech_management; db.createCollection('client_histories'); db.client_histories.createIndex({ clientEmail: 1 }, { unique: true });"
+```
+
+#### 3.0.3 Verificacion rapida de consistencia
+
+En `backend/.env` verifica:
+
+```env
+DB_NAME=fintech_management
+MONGO_DATABASE=fintech_management
+MONGO_CLIENT_HISTORIES_COLLECTION=client_histories
+```
+
+Si ves el error `Data truncated for column 'status'`, reaplica `sql/schema.sql` sobre la DB correcta.
+
 ### 3.1 Variables de entorno
 
 Usa `backend/.env` (puedes copiar `backend/.env.example`).
@@ -43,14 +104,14 @@ MYSQL_HOST=127.0.0.1
 MYSQL_PORT=3306
 MYSQL_USER=root
 MYSQL_PASSWORD=
-MYSQL_DATABASE=simulacro_dbb
+MYSQL_DATABASE=fintech_management
 MYSQL_CONNECTION_LIMIT=10
 # opcional por socket local:
 DB_SOCKET=
 
 # Mongo
 MONGO_URI=mongodb://127.0.0.1:27017
-MONGO_DATABASE=simulacro_dbb
+MONGO_DATABASE=fintech_management
 MONGO_CLIENT_HISTORIES_COLLECTION=client_histories
 ```
 
@@ -66,7 +127,7 @@ Notas del proyecto:
 
 ```bash
 cd backend
-mysql -u <usuario> -p < sql/schema.sql
+mysql -h 127.0.0.1 -P 3306 -u <usuario> -p fintech_management < sql/schema.sql
 ```
 
 3. Arranca backend:
