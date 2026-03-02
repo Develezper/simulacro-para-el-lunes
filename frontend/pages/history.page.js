@@ -55,10 +55,23 @@ form.addEventListener('submit', async (event) => {
     renderTable(tableContainer, {
       columns: txColumns,
       rows: Array.isArray(documentData.transactions) ? documentData.transactions : [],
-      emptyMessage: 'El cliente no tiene transacciones registradas en el historial.'
+      emptyMessage: 'El cliente no tiene transacciones registradas en el historial.',
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
     });
   } catch (error) {
-    renderTable(tableContainer, { columns: txColumns, rows: [] });
+    renderTable(tableContainer, {
+      columns: txColumns,
+      rows: [],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
+    });
     showMessage(messageBox, {
       type: 'error',
       message: error.message || 'No se pudo consultar el historial del cliente.',

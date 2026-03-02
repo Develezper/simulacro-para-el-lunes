@@ -51,10 +51,23 @@ async function loadTotalPaid() {
     renderTable(totalPaidContainer, {
       columns: columnsTotalPaid,
       rows: Array.isArray(response.data) ? response.data : [],
-      emptyMessage: 'No hay datos de total pagado.'
+      emptyMessage: 'No hay datos de total pagado.',
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
     });
   } catch (error) {
-    renderTable(totalPaidContainer, { columns: columnsTotalPaid, rows: [] });
+    renderTable(totalPaidContainer, {
+      columns: columnsTotalPaid,
+      rows: [],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
+    });
     showMessage(messageBox, {
       type: 'error',
       message: error.message || 'No se pudo cargar el reporte de total pagado.',
@@ -71,10 +84,23 @@ async function loadPendingInvoices() {
     renderTable(pendingInvoicesContainer, {
       columns: columnsPendingInvoices,
       rows: Array.isArray(response.data) ? response.data : [],
-      emptyMessage: 'No hay facturas pendientes.'
+      emptyMessage: 'No hay facturas pendientes.',
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
     });
   } catch (error) {
-    renderTable(pendingInvoicesContainer, { columns: columnsPendingInvoices, rows: [] });
+    renderTable(pendingInvoicesContainer, {
+      columns: columnsPendingInvoices,
+      rows: [],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
+    });
     showMessage(messageBox, {
       type: 'error',
       message: error.message || 'No se pudo cargar el reporte de facturas pendientes.',
@@ -100,10 +126,23 @@ async function loadTransactionsByPlatform() {
     renderTable(byPlatformContainer, {
       columns: columnsTransactionsByPlatform,
       rows: Array.isArray(response.data) ? response.data : [],
-      emptyMessage: `No hay transacciones para la plataforma ${platform}.`
+      emptyMessage: `No hay transacciones para la plataforma ${platform}.`,
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
     });
   } catch (error) {
-    renderTable(byPlatformContainer, { columns: columnsTransactionsByPlatform, rows: [] });
+    renderTable(byPlatformContainer, {
+      columns: columnsTransactionsByPlatform,
+      rows: [],
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50]
+      }
+    });
     showMessage(messageBox, {
       type: 'error',
       message: error.message || 'No se pudo cargar el reporte por plataforma.',
