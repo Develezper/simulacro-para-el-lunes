@@ -21,22 +21,59 @@ const txColumns = [
   { key: 'amount', label: 'Monto', formatter: (value) => formatCurrency(value) }
 ];
 
-function renderHistoryMetadata(documentData) {
-  const rows = [
-    ['Email cliente', documentData.clientEmail || ''],
-    ['Nombre cliente', documentData.clientName || ''],
-    ['Actualizado', formatDateTime(documentData.updatedAt)],
-    ['Creado', formatDateTime(documentData.createdAt)],
-    ['Transacciones', Array.isArray(documentData.transactions) ? documentData.transactions.length : 0]
-  ];
+function normalizeText(value, fallback = 'No disponible') {
+  if (value == null) return fallback;
+  const text = String(value).trim();
+  return text || fallback;
+}
 
-  metaOutput.textContent = rows.map(([label, value]) => `${label}: ${value}`).join('\n');
+function setHistoryPlaceholder() {
+  metaOutput.textContent = '';
+  const placeholder = document.createElement('p');
+  placeholder.className = 'result-placeholder';
+  placeholder.textContent = 'Aun no se ha consultado ningun cliente.';
+  metaOutput.appendChild(placeholder);
+}
+
+function appendMetaItem(container, label, value, options = {}) {
+  const { mono = false } = options;
+  const row = document.createElement('div');
+  row.className = 'result-meta-item';
+
+  const title = document.createElement('dt');
+  title.textContent = label;
+
+  const content = document.createElement('dd');
+  if (mono) {
+    content.classList.add('mono-value');
+  }
+  content.textContent = normalizeText(value);
+
+  row.append(title, content);
+  container.appendChild(row);
+}
+
+function renderHistoryMetadata(documentData) {
+  metaOutput.textContent = '';
+
+  const meta = document.createElement('dl');
+  meta.className = 'result-meta';
+
+  appendMetaItem(meta, 'Email cliente', documentData.clientEmail, { mono: true });
+  appendMetaItem(meta, 'Nombre cliente', documentData.clientName);
+  appendMetaItem(meta, 'Actualizado', formatDateTime(documentData.updatedAt));
+  appendMetaItem(meta, 'Creado', formatDateTime(documentData.createdAt));
+  appendMetaItem(meta, 'Transacciones', Array.isArray(documentData.transactions) ? documentData.transactions.length : 0, {
+    mono: true
+  });
+
+  metaOutput.appendChild(meta);
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   clearMessage(messageBox);
-  metaOutput.textContent = '';
+  setHistoryPlaceholder();
 
   const email = String(emailInput.value || '').trim().toLowerCase();
   if (!validateEmail(email)) {
@@ -79,3 +116,5 @@ form.addEventListener('submit', async (event) => {
     });
   }
 });
+
+setHistoryPlaceholder();

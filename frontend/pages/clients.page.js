@@ -19,6 +19,55 @@ let allClients = [];
 let currentPage = 1;
 let pageSize = 10;
 
+function normalizeText(value, fallback = 'No disponible') {
+  if (value == null) return fallback;
+  const text = String(value).trim();
+  return text || fallback;
+}
+
+function clearClientDetail() {
+  if (!detailOutput) return;
+  detailOutput.textContent = '';
+
+  const placeholder = document.createElement('p');
+  placeholder.className = 'result-placeholder';
+  placeholder.textContent = 'Selecciona "Ver" en una fila para mostrar datos.';
+  detailOutput.appendChild(placeholder);
+}
+
+function appendMetaItem(container, label, value, options = {}) {
+  const { mono = false } = options;
+  const row = document.createElement('div');
+  row.className = 'result-meta-item';
+
+  const title = document.createElement('dt');
+  title.textContent = label;
+
+  const content = document.createElement('dd');
+  if (mono) {
+    content.classList.add('mono-value');
+  }
+  content.textContent = normalizeText(value);
+
+  row.append(title, content);
+  container.appendChild(row);
+}
+
+function renderClientDetail(client) {
+  if (!detailOutput) return;
+  detailOutput.textContent = '';
+
+  const meta = document.createElement('dl');
+  meta.className = 'result-meta';
+  appendMetaItem(meta, 'ID', client.id, { mono: true });
+  appendMetaItem(meta, 'Identificacion', client.identification);
+  appendMetaItem(meta, 'Nombre', client.full_name);
+  appendMetaItem(meta, 'Email', client.email, { mono: true });
+  appendMetaItem(meta, 'Telefono', client.phone);
+  appendMetaItem(meta, 'Direccion', client.address);
+  detailOutput.appendChild(meta);
+}
+
 function getQueryMessage() {
   const params = new URLSearchParams(window.location.search);
 
@@ -148,7 +197,7 @@ function renderRows() {
     actionsCell.className = 'actions-cell';
 
     const viewButton = createActionButton('Ver', 'btn btn--ghost', () => {
-      detailOutput.textContent = JSON.stringify(client, null, 2);
+      renderClientDetail(client);
     });
 
     const editLink = document.createElement('a');
@@ -243,6 +292,8 @@ if (nextPageButton) {
 }
 
 const flashMessage = getQueryMessage();
+
+clearClientDetail();
 
 loadClients().then(() => {
   if (flashMessage) {
