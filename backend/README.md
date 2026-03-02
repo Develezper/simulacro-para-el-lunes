@@ -1,135 +1,146 @@
-# Simulacro Backend Hibrido - ExpertSoft Fintech
+# Simulacro Hybrid Backend - ExpertSoft Fintech
 
-API backend profesional basada en arquitectura hibrida con:
-- MySQL para integridad transaccional y reportes relacionales.
-- MongoDB para lectura rapida de historial por cliente.
-- Node.js + Express como capa REST.
+Professional backend API built with a hybrid architecture:
+- MySQL for transactional integrity and relational reporting.
+- MongoDB for fast client history reads.
+- Node.js + Express as the REST API layer.
 
-Proyecto implementado en ECMAScript Modules (`import/export`).
+Implemented with ECMAScript Modules (`import/export`).
 
-## 1. Objetivo
-Organizar informacion financiera desnormalizada (archivos Excel/CSV/TXT) en un backend consistente, con:
-- Modelo relacional en 3FN.
-- Migracion idempotente.
-- CRUD de clientes.
-- Reportes SQL.
-- Historial consolidado por cliente en MongoDB.
+## 1. Goal
 
-## 2. Arquitectura
-Estructura por capas:
+Organize denormalized financial information (Excel/CSV/TXT files) into a consistent backend with:
+- 3NF relational model.
+- Idempotent migration.
+- Client CRUD.
+- SQL reports.
+- Consolidated client history in MongoDB.
+
+## 2. Architecture
+
+Layered structure:
 
 ```text
 src/
-  config/        # conexiones y variables de entorno
-  middlewares/   # manejo de errores y 404
+  config/        # environment and database connections
+  middlewares/   # error and 404 handlers
   modules/
     clients/     # CRUD
-    reports/     # consultas analiticas SQL
-    migration/   # carga de archivos + upserts
-    histories/   # lectura/escritura Mongo
+    reports/     # analytical SQL queries
+    migration/   # file ingestion + upserts
+    histories/   # Mongo reads/writes
     health/      # health check
-  routes/        # composicion de rutas
-  app.js         # middlewares globales
-  index.js       # bootstrap servidor
-sql/             # esquema relacional
-uploads/         # archivos de entrada y evidencias
+  routes/        # route composition
+  app.js         # global middlewares
+  index.js       # server bootstrap
+sql/             # relational schema
+uploads/         # input files and evidence files
 ```
 
-## 3. Diseno de datos
+## 3. Data Design
 
-### 3.1 Modelo SQL (3FN)
-Tablas: `clients`, `platforms`, `invoices`, `transactions` en [sql/schema.sql](sql/schema.sql).
+### 3.1 SQL Model (3NF)
 
-Justificacion de normalizacion:
-- Datos de cliente separados de transacciones para evitar redundancia y anomalias de actualizacion.
-- Catalogo de plataformas desacoplado en tabla independiente (`platforms`).
-- Facturas separadas de transacciones y vinculadas por FK para conservar integridad historica.
-- Restricciones de unicidad (`identification`, `email`, `invoice_number`, `txn_code`) para garantizar consistencia.
+Tables: `clients`, `platforms`, `invoices`, `transactions` in [sql/schema.sql](sql/schema.sql).
 
-Integridad y seguridad de datos:
-- FKs con `ON UPDATE CASCADE` y `ON DELETE RESTRICT`.
-- `CHECK` para montos y formato de periodo de facturacion.
-- Indices en columnas de consulta frecuente (estado, fecha, llaves foraneas).
+Normalization rationale:
+- Client data is separated from transactions to avoid redundancy and update anomalies.
+- Platform catalog is isolated in its own table (`platforms`).
+- Invoices are separate from transactions and linked via FKs for historical integrity.
+- Uniqueness constraints (`identification`, `email`, `invoice_number`, `txn_code`) enforce consistency.
 
-### 3.2 Modelo MongoDB
-Coleccion: `client_histories`.
+Integrity and safety:
+- FKs with `ON UPDATE CASCADE` and `ON DELETE RESTRICT`.
+- `CHECK` constraints for amounts and billing period format.
+- Indexes for frequently queried columns (status, dates, foreign keys).
 
-Un documento por cliente con arreglo de transacciones. Se usa para responder `GET /api/clients/:email/history` sin JOINs, optimizando lectura completa de historial.
+### 3.2 MongoDB Model
 
-## 4. Decisiones SQL vs Mongo
-- SQL: operaciones transaccionales, validaciones estructurales, reportes agregados y relaciones.
-- Mongo: lectura documental del historial completo por cliente.
+Collection: `client_histories`.
 
-Estrategia de consistencia:
-- La migracion procesa cada fila y actualiza ambos motores.
-- En MySQL se usa `INSERT ... ON DUPLICATE KEY UPDATE` para idempotencia.
-- En Mongo se hace upsert por `clientEmail` y deduplicacion de transaccion por `txnCode`.
+One document per client with an embedded transaction array. Used by `GET /api/clients/:email/history` to optimize full-history reads without SQL joins.
 
-## 5. Migracion e idempotencia
+## 4. SQL vs Mongo Decisions
+
+- SQL: transactional operations, structural validations, aggregated reports, relationships.
+- Mongo: document-based read model for full client history.
+
+Consistency strategy:
+- Migration processes each row and updates both engines.
+- MySQL uses `INSERT ... ON DUPLICATE KEY UPDATE` for idempotency.
+- Mongo uses upsert by `clientEmail` and transaction dedupe by `txnCode`.
+
+## 5. Migration and Idempotency
+
 Endpoint: `POST /api/migration/upload`.
 
-Caracteristicas:
-- Acepta `.xlsx`, `.csv`, `.txt`, `.tsv` en campo `file`.
-- Incluye artefacto CSV de referencia en `uploads/data.csv` (convertido desde el Excel base).
-- Parser robusto para delimitados con comillas y saltos de linea.
-- Conversion de fecha Excel serial a `YYYY-MM-DD HH:mm:ss`.
-- Upserts idempotentes en MySQL y MongoDB.
-- Genera evidencia automatica en `uploads/evidencias/*.json`.
+Features:
+- Accepts `.xlsx`, `.csv`, `.txt`, `.tsv` in the `file` field.
+- Includes a reference CSV artifact in `uploads/data.csv` (converted from base Excel file).
+- Robust parser for quoted delimited data and multiline values.
+- Excel serial date conversion to `YYYY-MM-DD HH:mm:ss`.
+- Idempotent upserts in MySQL and MongoDB.
+- Auto-generated normalization evidence in `uploads/evidencias/*.json`.
 
-Resultado del endpoint:
-- `summary`: conteos operativos.
-- `normalizationSummary`: resumen de deduplicacion.
-- `normalizationEvidenceFile`: ruta del JSON de evidencia.
+Endpoint response:
+- `summary`: operational counters.
+- `normalizationSummary`: deduplication summary.
+- `normalizationEvidenceFile`: generated evidence JSON path.
 
 ## 6. Endpoints
 
 ### 6.1 Health
 - `GET /api/health`
 
-### 6.2 Clientes (MySQL)
+### 6.2 Clients (MySQL)
 - `GET /api/clients`
 - `GET /api/clients/:id`
 - `POST /api/clients`
 - `PUT /api/clients/:id`
 - `DELETE /api/clients/:id`
-  - El borrado elimina en cascada las `transactions` y `invoices` asociadas al cliente dentro de una transaccion SQL.
+  - Deletion removes related `transactions` and `invoices` within a SQL transaction.
 
-### 6.3 Reportes (MySQL)
+### 6.3 Reports (MySQL)
 - `GET /api/reports/total-paid-by-client`
 - `GET /api/reports/pending-invoices`
 - `GET /api/reports/transactions-by-platform?platform=Nequi`
 
-### 6.4 Historial (MongoDB)
+### 6.4 History (MongoDB)
 - `GET /api/clients/:email/history`
 
-### 6.5 Migracion
+### 6.5 Migration
 - `POST /api/migration/upload`
 
-## 7. Normalizacion local
-Archivo: [normalizacion.js](normalizacion.js)
+## 7. Local Normalization Utility
 
-Uso recomendado:
+File: [normalizacion.js](normalizacion.js)
+
+Recommended:
+
 ```bash
 npm run normalize:data
 ```
 
-Uso manual:
+Manual:
+
 ```bash
 node normalizacion.js uploads/data.xlsx --out uploads/normalizado.json
 ```
 
-Salida:
-- `clients`, `platforms`, `invoices`, `transactions` deduplicados.
-- Resumen de filas procesadas y unicos.
+Output:
+- Deduplicated `clients`, `platforms`, `invoices`, `transactions`.
+- Processing summary with unique counts.
 
-## 8. Configuracion
-Variables en `.env` (ver tambien `.env.example`).
+## 8. Configuration
 
-Compatibilidad:
-- MySQL: se puede configurar con `MYSQL_*` o `DB_*`.
-- Soporte opcional a socket local con `DB_SOCKET` / `MYSQL_SOCKET`.
+Use `.env` (see `.env.example`).
 
-Ejemplo base:
+Compatibility:
+- MySQL supports both `MYSQL_*` and `DB_*` variables.
+- Optional local socket support with `DB_SOCKET` / `MYSQL_SOCKET`.
+
+Example:
+
 ```env
 PORT=3000
 MIGRATION_CONCURRENCY=8
@@ -145,60 +156,65 @@ MONGO_DATABASE=simulacro_dbb
 MONGO_CLIENT_HISTORIES_COLLECTION=client_histories
 ```
 
-Nota de rendimiento:
-- `MIGRATION_CONCURRENCY` controla cuantas filas se procesan en paralelo durante la migracion.
-- Recomendado: `6` a `12` en local, segun capacidad de MySQL/Mongo.
+Performance note:
+- `MIGRATION_CONCURRENCY` controls parallel row processing during migration.
+- Recommended local range: `6` to `12`, depending on machine capacity.
 
-## 9. Ejecucion
-Instalacion:
+## 9. Run
+
+Install:
+
 ```bash
 npm install
 ```
 
-Crear esquema SQL:
+Create SQL schema:
+
 ```bash
 mysql -u <user> -p < sql/schema.sql
 ```
 
-Levantar API:
+Start API:
+
 ```bash
 npm run dev
 ```
 
-## 10. Frontend de prueba (Vite + HTML/CSS/JS)
-Se incluyo un frontend simple para probar el backend en:
-- `frontend/index.html`
-- `frontend/styles.css`
-- `frontend/app.js`
+## 10. Test Frontend (Vite + HTML/CSS/JS)
 
-Uso:
-1. Levanta el backend con `npm run dev` (desde `backend/`).
-2. En otra terminal: `cd ../frontend && npm install && npm run dev`.
-3. Abre `http://127.0.0.1:5173`.
-4. Verifica que `Base URL API` apunte a `http://127.0.0.1:3000/api`.
-5. Usa botones/formularios para probar health, clientes, reportes, historial y migracion.
+A minimal frontend for API testing is included under `../frontend/`.
 
-## 11. Troubleshooting rapido
+Usage:
+1. Start backend from `backend/` with `npm run dev`.
+2. In another terminal: `cd ../frontend && npm install && npm run dev`.
+3. Open `http://127.0.0.1:5173`.
+4. Verify API base URL points to `http://127.0.0.1:3000/api`.
+5. Use pages/forms to test health, clients, reports, history, and migration.
+
+## 11. Quick Troubleshooting
+
 - `Access denied for user ...`:
-  - validar `DB_USER`, `DB_PASSWORD`, permisos del usuario y DB objetivo.
-- `Incorrect datetime value ...` durante migracion:
-  - verificar parser de fechas y formato origen del archivo.
-- Historial no encontrado (`404`):
-  - ejecutar migracion primero para poblar `client_histories`.
-- Timeout/conexion Mongo Atlas:
-  - revisar credenciales, IP allowlist y nombre de base.
+  - Check `DB_USER`, `DB_PASSWORD`, user privileges, and selected DB.
+- `Incorrect datetime value ...` during migration:
+  - Check source date formats and parser mapping.
+- History not found (`404`):
+  - Run migration first to populate `client_histories`.
+- Mongo timeout/connection issue:
+  - Check URI, credentials, network access, and DB name.
 
-## 12. Recursos tecnicos
+## 12. Technical References
+
 - Express: https://expressjs.com/
 - mysql2: https://www.npmjs.com/package/mysql2
 - MongoDB Node Driver: https://www.npmjs.com/package/mongodb
 - Multer: https://www.npmjs.com/package/multer
 - SheetJS/xlsx: https://www.npmjs.com/package/xlsx
 
-## 13. Estado del entregable
-Completado:
-- Esquema SQL en 3FN.
-- CRUD clientes.
-- Reportes SQL.
-- Migracion idempotente con evidencia.
-- Historial Mongo por email.
+## 13. Delivery Status
+
+Implemented:
+- 3NF SQL schema.
+- Client CRUD.
+- SQL reports.
+- Idempotent migration with evidence.
+- Mongo client history by email.

@@ -125,4 +125,5 @@ Re-apply `backend/sql/schema.sql` to align enums.
 ## 10. Additional Technical Docs
 
 - Detailed backend documentation: [backend/README.md](backend/README.md)
+- Frontend documentation: [frontend/README.md](frontend/README.md)
 - Step-by-step adaptation guide: [guia_adaptacion_examen_mysql_mongo.md](guia_adaptacion_examen_mysql_mongo.md)
