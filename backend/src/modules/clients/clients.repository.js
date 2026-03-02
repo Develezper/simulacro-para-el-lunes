@@ -13,6 +13,17 @@ async function findClientById(id) {
   return rows[0] ?? null;
 }
 
+async function findClientByEmail(email) {
+  const sql = `
+    SELECT id, identification, full_name, email, phone, address, created_at, updated_at
+    FROM clients
+    WHERE email = ?
+    LIMIT 1
+  `;
+  const rows = await executeQuery(sql, [email]);
+  return rows[0] ?? null;
+}
+
 async function findClientByIdentificationOrEmail(identification, email, excludedId = null) {
   let sql = `SELECT ${CLIENT_COLUMNS} FROM clients WHERE (identification = ? OR email = ?)`;
   const params = [identification, email];
@@ -90,6 +101,7 @@ export {
   createClient,
   deleteClientCascadeById,
   findAllClients,
+  findClientByEmail,
   findClientById,
   findClientByIdentificationOrEmail,
   updateClientById

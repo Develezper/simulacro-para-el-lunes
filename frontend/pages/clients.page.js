@@ -9,8 +9,15 @@ const searchInput = document.getElementById('searchClient');
 const refreshButton = document.getElementById('btnRefreshClients');
 const tbody = document.getElementById('clientsTableBody');
 const detailOutput = document.getElementById('clientDetailOutput');
+const paginationMeta = document.getElementById('clientsPaginationMeta');
+const pageIndicator = document.getElementById('pageIndicator');
+const pageSizeSelect = document.getElementById('pageSizeSelect');
+const prevPageButton = document.getElementById('btnPrevPage');
+const nextPageButton = document.getElementById('btnNextPage');
 
 let allClients = [];
+let currentPage = 1;
+let pageSize = 10;
 
 function getQueryMessage() {
   const params = new URLSearchParams(window.location.search);
@@ -50,9 +57,55 @@ function createActionButton(label, className, callback) {
   return button;
 }
 
-function renderRows() {
+function getFilteredClients() {
   const query = normalizeSearch(searchInput.value);
-  const rows = filterClients(allClients, query);
+  return filterClients(allClients, query);
+}
+
+function getPagination(filteredRows) {
+  const totalRows = filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+
+  const startIndex = totalRows ? (currentPage - 1) * pageSize : 0;
+  const endIndex = Math.min(startIndex + pageSize, totalRows);
+
+  return {
+    totalRows,
+    totalPages,
+    startIndex,
+    endIndex,
+    rows: filteredRows.slice(startIndex, endIndex)
+  };
+}
+
+function renderPagination({ totalRows, totalPages, startIndex, endIndex }) {
+  if (paginationMeta) {
+    paginationMeta.textContent = totalRows
+      ? `Mostrando ${startIndex + 1}-${endIndex} de ${totalRows} resultados.`
+      : 'Sin resultados.';
+  }
+
+  if (pageIndicator) {
+    pageIndicator.textContent = totalRows ? `Pagina ${currentPage} de ${totalPages}` : 'Pagina 0 de 0';
+  }
+
+  if (prevPageButton) {
+    prevPageButton.disabled = totalRows === 0 || currentPage <= 1;
+  }
+
+  if (nextPageButton) {
+    nextPageButton.disabled = totalRows === 0 || currentPage >= totalPages;
+  }
+}
+
+function renderRows() {
+  const filteredRows = getFilteredClients();
+  const pagination = getPagination(filteredRows);
+  const rows = pagination.rows;
 
   tbody.textContent = '';
 
@@ -64,6 +117,7 @@ function renderRows() {
     td.textContent = 'No hay clientes para mostrar con ese filtro.';
     tr.appendChild(td);
     tbody.appendChild(tr);
+    renderPagination(pagination);
     return;
   }
 
@@ -129,6 +183,8 @@ function renderRows() {
 
     tbody.appendChild(tr);
   }
+
+  renderPagination(pagination);
 }
 
 async function loadClients() {
@@ -149,8 +205,42 @@ async function loadClients() {
   }
 }
 
-searchInput.addEventListener('input', renderRows);
+searchInput.addEventListener('input', () => {
+  currentPage = 1;
+  renderRows();
+});
+
 refreshButton.addEventListener('click', loadClients);
+
+if (pageSizeSelect) {
+  pageSizeSelect.value = String(pageSize);
+
+  pageSizeSelect.addEventListener('change', () => {
+    const selectedSize = Number(pageSizeSelect.value);
+    pageSize = Number.isInteger(selectedSize) && selectedSize > 0 ? selectedSize : 10;
+    currentPage = 1;
+    renderRows();
+  });
+}
+
+if (prevPageButton) {
+  prevPageButton.addEventListener('click', () => {
+    if (currentPage <= 1) return;
+    currentPage -= 1;
+    renderRows();
+  });
+}
+
+if (nextPageButton) {
+  nextPageButton.addEventListener('click', () => {
+    const totalRows = getFilteredClients().length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+
+    if (currentPage >= totalPages) return;
+    currentPage += 1;
+    renderRows();
+  });
+}
 
 const flashMessage = getQueryMessage();
 

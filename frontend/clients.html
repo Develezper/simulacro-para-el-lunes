@@ -64,6 +64,21 @@
             <tbody id="clientsTableBody"></tbody>
           </table>
         </div>
+        <div id="clientsPagination" class="pagination-bar" aria-live="polite">
+          <p id="clientsPaginationMeta" class="pagination-meta">Sin resultados.</p>
+          <div class="pagination-controls">
+            <label for="pageSizeSelect">Por pagina</label>
+            <select id="pageSizeSelect">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+            <button id="btnPrevPage" type="button" class="btn btn--ghost">Anterior</button>
+            <span id="pageIndicator" class="pagination-indicator">Pagina 1 de 1</span>
+            <button id="btnNextPage" type="button" class="btn btn--ghost">Siguiente</button>
+          </div>
+        </div>
       </section>
 
       <section class="panel">

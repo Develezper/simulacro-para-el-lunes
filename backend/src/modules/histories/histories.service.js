@@ -1,4 +1,5 @@
 import { findClientHistoryByEmail } from './histories.repository.js';
+import { findClientByEmail } from '../clients/clients.repository.js';
 import { createHttpError } from '../../utils/httpError.js';
 
 function validateHistoryEmail(rawEmail) {
@@ -15,11 +16,23 @@ async function getClientHistoryByEmailService(rawEmail) {
   const email = validateHistoryEmail(rawEmail);
   const document = await findClientHistoryByEmail(email);
 
-  if (!document) {
-    throw createHttpError(404, 'Historial de cliente no encontrado');
+  if (document) {
+    return document;
   }
 
-  return document;
+  const client = await findClientByEmail(email);
+
+  if (!client) {
+    throw createHttpError(404, 'Cliente no encontrado');
+  }
+
+  return {
+    clientEmail: client.email,
+    clientName: client.full_name,
+    createdAt: client.created_at ?? null,
+    updatedAt: client.updated_at ?? null,
+    transactions: []
+  };
 }
 
 export { getClientHistoryByEmailService };
