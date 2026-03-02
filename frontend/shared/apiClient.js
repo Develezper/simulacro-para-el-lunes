@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { getStoredApiBaseUrl } from './config.js';
 
 const DEFAULT_TIMEOUT_MS = 20000;
+const API_BASE_URL = 'http://127.0.0.1:3000/api';
 
 function joinUrl(base, path) {
   const safePath = String(path || '').startsWith('/') ? path : `/${path}`;
@@ -50,7 +50,7 @@ async function apiRequest(path, options = {}) {
     params
   } = options;
 
-  const url = joinUrl(getStoredApiBaseUrl(), path);
+  const url = joinUrl(API_BASE_URL, path);
 
   try {
     const response = await axios({
@@ -94,4 +94,4 @@ async function apiRequest(path, options = {}) {
   }
 }
 
-export { DEFAULT_TIMEOUT_MS, apiRequest };
+export { API_BASE_URL, DEFAULT_TIMEOUT_MS, apiRequest };

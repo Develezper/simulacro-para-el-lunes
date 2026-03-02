@@ -99,33 +99,6 @@ a {
   background: var(--brand);
 }
 
-.api-config {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 0.45rem;
-  padding: 0.85rem;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.api-config label {
-  font-weight: 600;
-  font-size: 0.87rem;
-  color: var(--muted);
-}
-
-.api-config-controls {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.api-config-feedback {
-  color: var(--muted);
-  min-height: 1rem;
-}
-
 .page-shell {
   width: min(1160px, 94vw);
   margin: 1.4rem auto 2.2rem;
@@ -572,18 +545,6 @@ button:hover {
   font-weight: 700;
 }
 
-.json-output {
-  margin: 0;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #f4f8fb;
-  padding: 0.85rem;
-  min-height: 120px;
-  overflow: auto;
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
-
 @media (max-width: 980px) {
   .app-header {
     grid-template-columns: 1fr;
@@ -591,10 +552,6 @@ button:hover {
 
   .app-nav {
     order: 3;
-  }
-
-  .api-config {
-    order: 2;
   }
 }
 
