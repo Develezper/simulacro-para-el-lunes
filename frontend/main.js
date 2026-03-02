@@ -1,2 +1,1 @@
-import './styles.css';
-import './app.js';
+import './pages/dashboard.page.js';

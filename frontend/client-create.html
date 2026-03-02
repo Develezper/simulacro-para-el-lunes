@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fintech Admin | Dashboard</title>
+    <title>Fintech Admin | Nuevo cliente</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -11,7 +11,7 @@
     <header class="app-header">
       <div class="brand-block">
         <a class="brand" href="/index.html">Fintech Admin</a>
-        <span class="brand-subtitle">Panel operativo (rol admin)</span>
+        <span class="brand-subtitle">Alta de clientes</span>
       </div>
 
       <nav class="app-nav" aria-label="Principal">
@@ -34,50 +34,51 @@
       </form>
     </header>
 
-    <main class="page-shell">
-      <section class="page-title-block">
-        <h1>Dashboard</h1>
-        <p>Acceso rapido a todas las operaciones disponibles del backend.</p>
+    <main class="page-shell page-shell--narrow">
+      <section class="page-title-block page-title-block--row">
+        <div>
+          <h1>Nuevo cliente</h1>
+          <p>Completa todos los campos para registrar un cliente.</p>
+        </div>
+        <a href="/clients.html" class="btn btn--ghost">Volver al listado</a>
       </section>
 
       <section id="pageMessage" class="alert" hidden></section>
 
-      <section class="grid-cards grid-cards--modules">
-        <a class="module-card" href="/clients.html">
-          <h2>Clientes</h2>
-          <p>Lista, busca, edita y elimina clientes.</p>
-        </a>
-
-        <a class="module-card" href="/client-create.html">
-          <h2>Nuevo cliente</h2>
-          <p>Alta de clientes con validacion previa.</p>
-        </a>
-
-        <a class="module-card" href="/reports.html">
-          <h2>Reportes</h2>
-          <p>Consultas SQL agregadas y por plataforma.</p>
-        </a>
-
-        <a class="module-card" href="/history.html">
-          <h2>Historial</h2>
-          <p>Consulta documental por email desde MongoDB.</p>
-        </a>
-
-        <a class="module-card" href="/migration.html">
-          <h2>Migracion</h2>
-          <p>Carga archivos y ejecuta upserts idempotentes.</p>
-        </a>
-      </section>
-
       <section class="panel">
-        <div class="panel-header">
-          <h2>Estado del backend</h2>
-          <button id="btnCheckHealth" class="btn" type="button">Verificar health</button>
-        </div>
-        <pre id="healthOutput" class="json-output">Listo para consultar GET /health</pre>
+        <form id="createClientForm" class="form-grid" novalidate>
+          <label>
+            Identificacion
+            <input name="identification" type="text" minlength="4" maxlength="32" required />
+          </label>
+
+          <label>
+            Nombre completo
+            <input name="full_name" type="text" minlength="3" maxlength="150" required />
+          </label>
+
+          <label>
+            Email
+            <input name="email" type="email" maxlength="180" required />
+          </label>
+
+          <label>
+            Telefono
+            <input name="phone" type="text" minlength="7" maxlength="40" required />
+          </label>
+
+          <label>
+            Direccion
+            <input name="address" type="text" minlength="5" maxlength="255" required />
+          </label>
+
+          <div class="row-actions">
+            <button id="btnCreateClient" class="btn" type="submit">Crear cliente</button>
+          </div>
+        </form>
       </section>
     </main>
 
-    <script type="module" src="/main.js"></script>
+    <script type="module" src="/pages/client-create.page.js"></script>
   </body>
 </html>
