@@ -56,10 +56,3 @@ Current default:
 
 If backend host/port changes, update that constant.
 
-## 7. Build and Preview
-
-```bash
-npm run build
-npm run preview
-```
-
