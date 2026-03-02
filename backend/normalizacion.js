@@ -5,14 +5,14 @@ import { parseMigrationFile } from './src/modules/migration/parsers/migration.pa
 
 function deriveInvoiceStatus(billedAmount, paidAmount) {
   if (paidAmount <= 0) {
-    return 'Pendiente';
+    return 'Pending';
   }
 
   if (paidAmount < billedAmount) {
-    return 'Parcial';
+    return 'Partial';
   }
 
-  return 'Pagada';
+  return 'Paid';
 }
 
 function normalizeRows(rows) {

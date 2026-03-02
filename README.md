@@ -17,5 +17,6 @@ URLs:
 - Frontend: `http://127.0.0.1:5173`
 - API: `http://127.0.0.1:3000/api`
 
-Archivo principal de migracion:
+Archivos base de migracion:
 - `backend/uploads/data.xlsx`
+- `backend/uploads/data.csv`

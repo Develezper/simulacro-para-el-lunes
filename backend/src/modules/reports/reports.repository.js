@@ -30,12 +30,25 @@ async function getPendingInvoicesRows() {
       (i.billed_amount - i.paid_amount) AS pending_amount,
       c.id AS client_id,
       c.full_name AS client_name,
-      c.email AS client_email
+      c.email AS client_email,
+      t.txn_code,
+      t.txn_date,
+      t.status AS txn_status,
+      t.transaction_type,
+      p.name AS platform
     FROM invoices i
     INNER JOIN clients c ON c.id = i.client_id
+    LEFT JOIN transactions t ON t.id = (
+      SELECT t2.id
+      FROM transactions t2
+      WHERE t2.invoice_id = i.id
+      ORDER BY t2.txn_date DESC, t2.id DESC
+      LIMIT 1
+    )
+    LEFT JOIN platforms p ON p.id = t.platform_id
     WHERE i.paid_amount < i.billed_amount
-       OR i.status IN ('Pendiente', 'Parcial')
-    ORDER BY i.billing_period DESC, i.id DESC
+       OR i.status IN ('Pending', 'Partial')
+    ORDER BY i.billing_period DESC, i.id DESC, t.txn_date DESC
   `;
 
   return executeQuery(sql);

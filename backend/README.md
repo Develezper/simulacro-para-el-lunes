@@ -70,6 +70,7 @@ Endpoint: `POST /api/migration/upload`.
 
 Caracteristicas:
 - Acepta `.xlsx`, `.csv`, `.txt`, `.tsv` en campo `file`.
+- Incluye artefacto CSV de referencia en `uploads/data.csv` (convertido desde el Excel base).
 - Parser robusto para delimitados con comillas y saltos de linea.
 - Conversion de fecha Excel serial a `YYYY-MM-DD HH:mm:ss`.
 - Upserts idempotentes en MySQL y MongoDB.

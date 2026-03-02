@@ -2,14 +2,14 @@ import { executeQuery } from '../../config/mysql.js';
 
 function deriveInvoiceStatus(billedAmount, paidAmount) {
   if (paidAmount <= 0) {
-    return 'Pendiente';
+    return 'Pending';
   }
 
   if (paidAmount < billedAmount) {
-    return 'Parcial';
+    return 'Partial';
   }
 
-  return 'Pagada';
+  return 'Paid';
 }
 
 async function upsertClientRecord(client) {

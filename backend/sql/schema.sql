@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   billing_period CHAR(7) NOT NULL,
   billed_amount DECIMAL(12, 2) NOT NULL,
   paid_amount DECIMAL(12, 2) NOT NULL DEFAULT 0,
-  status ENUM('Pendiente', 'Parcial', 'Pagada') NOT NULL DEFAULT 'Pendiente',
+  status ENUM('Pending', 'Partial', 'Paid') NOT NULL DEFAULT 'Pending',
   client_id INT UNSIGNED NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   txn_code VARCHAR(30) NOT NULL,
   txn_date DATETIME NOT NULL,
   amount DECIMAL(12, 2) NOT NULL,
-  status ENUM('Pendiente', 'Completada', 'Fallida') NOT NULL,
+  status ENUM('Pending', 'Completed', 'Failed') NOT NULL,
   transaction_type VARCHAR(80) NOT NULL,
   client_id INT UNSIGNED NOT NULL,
   platform_id SMALLINT UNSIGNED NOT NULL,
@@ -71,3 +71,27 @@ CREATE TABLE IF NOT EXISTS transactions (
     ON UPDATE CASCADE
     ON DELETE RESTRICT
 );
+
+ALTER TABLE invoices
+  MODIFY COLUMN status ENUM('Pendiente', 'Parcial', 'Pagada', 'Pending', 'Partial', 'Paid')
+  NOT NULL DEFAULT 'Pending';
+
+UPDATE invoices SET status = 'Pending' WHERE status = 'Pendiente';
+UPDATE invoices SET status = 'Partial' WHERE status = 'Parcial';
+UPDATE invoices SET status = 'Paid' WHERE status = 'Pagada';
+
+ALTER TABLE invoices
+  MODIFY COLUMN status ENUM('Pending', 'Partial', 'Paid')
+  NOT NULL DEFAULT 'Pending';
+
+ALTER TABLE transactions
+  MODIFY COLUMN status ENUM('Pendiente', 'Completada', 'Fallida', 'Pending', 'Completed', 'Failed')
+  NOT NULL;
+
+UPDATE transactions SET status = 'Pending' WHERE status = 'Pendiente';
+UPDATE transactions SET status = 'Completed' WHERE status = 'Completada';
+UPDATE transactions SET status = 'Failed' WHERE status = 'Fallida';
+
+ALTER TABLE transactions
+  MODIFY COLUMN status ENUM('Pending', 'Completed', 'Failed')
+  NOT NULL;

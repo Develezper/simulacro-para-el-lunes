@@ -23,6 +23,14 @@ const REQUIRED_HEADERS = {
 
 const REQUIRED_HEADER_VALUES = Object.values(REQUIRED_HEADERS);
 const NORMALIZED_HEADERS = new Set(REQUIRED_HEADER_VALUES.map((header) => normalizeToken(header)));
+const TRANSACTION_STATUS_MAP = new Map([
+  ['pendiente', 'Pending'],
+  ['pending', 'Pending'],
+  ['completada', 'Completed'],
+  ['completed', 'Completed'],
+  ['fallida', 'Failed'],
+  ['failed', 'Failed']
+]);
 
 function normalizeToken(value) {
   return String(value ?? '')
@@ -82,6 +90,21 @@ function parseTransactionDate(value, fieldName) {
   throw createHttpError(400, `No se pudo convertir ${fieldName} a fecha valida: ${value}`);
 }
 
+function normalizeTransactionStatus(value, fieldName) {
+  const rawValue = parseText(value, fieldName);
+  const normalizedKey = normalizeToken(rawValue);
+  const mapped = TRANSACTION_STATUS_MAP.get(normalizedKey);
+
+  if (!mapped) {
+    throw createHttpError(
+      400,
+      `Estado de transaccion no soportado en ${fieldName}: ${rawValue}`
+    );
+  }
+
+  return mapped;
+}
+
 function isRowCompletelyEmpty(row) {
   return Object.values(REQUIRED_HEADERS).every((header) => {
     const value = row?.[header];
@@ -120,7 +143,10 @@ function normalizeRawRows(rawRowsWithPosition) {
         txnCode: parseText(row[REQUIRED_HEADERS.txCode], REQUIRED_HEADERS.txCode),
         txnDate: parseTransactionDate(row[REQUIRED_HEADERS.txDate], REQUIRED_HEADERS.txDate),
         amount: parseNumber(row[REQUIRED_HEADERS.txAmount], REQUIRED_HEADERS.txAmount),
-        status: parseText(row[REQUIRED_HEADERS.txStatus], REQUIRED_HEADERS.txStatus),
+        status: normalizeTransactionStatus(
+          row[REQUIRED_HEADERS.txStatus],
+          REQUIRED_HEADERS.txStatus
+        ),
         transactionType: parseText(row[REQUIRED_HEADERS.txType], REQUIRED_HEADERS.txType),
         client: {
           fullName: parseText(row[REQUIRED_HEADERS.clientName], REQUIRED_HEADERS.clientName),
@@ -160,8 +186,9 @@ function assertHeaders(rawRows) {
   }
 }
 
-async function parseTextLikeFile(filePath, delimiter) {
+async function parseDelimitedFile(filePath, extension) {
   const content = await fs.readFile(filePath, 'utf8');
+  const delimiter = extension === '.csv' ? ',' : '\t';
   const rows = parseDelimitedWithQuotes(content, { delimiter });
   return rowsToObjects(rows);
 }
@@ -196,10 +223,8 @@ async function parseMigrationFile(file) {
 
   if (extension === '.xlsx') {
     rawRows = await parseXlsxFile(file.path);
-  } else if (extension === '.csv') {
-    rawRows = await parseTextLikeFile(file.path, ',');
-  } else if (extension === '.txt' || extension === '.tsv') {
-    rawRows = await parseTextLikeFile(file.path, '\t');
+  } else if (extension === '.csv' || extension === '.txt' || extension === '.tsv') {
+    rawRows = await parseDelimitedFile(file.path, extension);
   } else {
     throw createHttpError(400, 'Extension no soportada. Usa .xlsx, .csv, .txt o .tsv');
   }
