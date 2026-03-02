@@ -1,4 +1,4 @@
-import { executeQuery } from '../../config/mysql.js';
+import { executeQuery, getMySQLPool } from '../../config/mysql.js';
 
 const CLIENT_COLUMNS = 'id, identification, full_name, email, phone, address';
 
@@ -57,15 +57,38 @@ async function updateClientById(id, clientData) {
   return findClientById(id);
 }
 
-async function deleteClientById(id) {
-  const sql = 'DELETE FROM clients WHERE id = ?';
-  const result = await executeQuery(sql, [id]);
-  return result.affectedRows > 0;
+async function deleteClientCascadeById(id) {
+  const pool = await getMySQLPool();
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [transactionsResult] = await connection.execute(
+      'DELETE FROM transactions WHERE client_id = ?',
+      [id]
+    );
+    const [invoicesResult] = await connection.execute('DELETE FROM invoices WHERE client_id = ?', [id]);
+    const [clientResult] = await connection.execute('DELETE FROM clients WHERE id = ?', [id]);
+
+    await connection.commit();
+
+    return {
+      deletedTransactions: transactionsResult.affectedRows ?? 0,
+      deletedInvoices: invoicesResult.affectedRows ?? 0,
+      deletedClients: clientResult.affectedRows ?? 0
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export {
   createClient,
-  deleteClientById,
+  deleteClientCascadeById,
   findAllClients,
   findClientById,
   findClientByIdentificationOrEmail,

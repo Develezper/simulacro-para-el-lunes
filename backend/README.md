@@ -91,6 +91,7 @@ Resultado del endpoint:
 - `POST /api/clients`
 - `PUT /api/clients/:id`
 - `DELETE /api/clients/:id`
+  - El borrado elimina en cascada las `transactions` y `invoices` asociadas al cliente dentro de una transaccion SQL.
 
 ### 6.3 Reportes (MySQL)
 - `GET /api/reports/total-paid-by-client`

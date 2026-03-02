@@ -1,6 +1,6 @@
 import {
   createClient,
-  deleteClientById,
+  deleteClientCascadeById,
   findAllClients,
   findClientById,
   findClientByIdentificationOrEmail,
@@ -65,7 +65,7 @@ async function deleteClientService(rawId) {
     throw createHttpError(404, 'Cliente no encontrado');
   }
 
-  await deleteClientById(id);
+  await deleteClientCascadeById(id);
 }
 
 export {

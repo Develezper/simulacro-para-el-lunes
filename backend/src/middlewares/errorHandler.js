@@ -7,6 +7,11 @@ function errorHandler(err, _req, res, _next) {
     message = 'Registro duplicado: la informacion debe ser unica';
   }
 
+  if (err?.code === 'ER_ROW_IS_REFERENCED' || err?.code === 'ER_ROW_IS_REFERENCED_2') {
+    status = 409;
+    message = 'No se puede eliminar o actualizar el registro porque tiene dependencias relacionadas';
+  }
+
   if (err?.code === 'ER_NO_SUCH_TABLE') {
     status = 500;
     message = 'No existe la tabla requerida. Ejecuta primero sql/schema.sql en MySQL.';
